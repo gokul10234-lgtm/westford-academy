@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Westford Sports - Indian Academy | Login</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="center-screen">
+  <div class="card">
+    <h1>Westford Sports - Indian Academy</h1>
+    <p class="sub">Sign in to manage registrations, schedules, attendance, and reports.</p>
+    <form id="loginForm">
+      <label for="username">Username</label>
+      <input type="text" id="username" required autocomplete="username" placeholder="Your username">
+      <label for="password">Password</label>
+      <input type="password" id="password" required autocomplete="current-password" placeholder="Your password">
+      <button type="submit" class="btn btn-block">Sign In</button>
+    </form>
+    <div id="msg"></div>
+    <p class="small-note" style="margin-top:16px">Trainer accounts use your name as the username. Contact the main admin if you've forgotten your password.</p>
+    <p class="small-note" style="margin-top:8px">Student or parent? <a href="/status.html">Check your attendance status</a> - no login needed.</p>
+  </div>
+</div>
+<script src="/api.js"></script>
+<script>
+  if (Auth.getToken()) window.location.href = '/index.html';
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('msg');
+    msg.innerHTML = '';
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    try {
+      const data = await api('/auth/login', { method: 'POST', body: { username, password } });
+      Auth.setSession(data);
+      if (data.mustChangePassword) {
+        window.location.href = '/change-password.html?first=1';
+      } else {
+        window.location.href = '/index.html';
+      }
+    } catch (err) {
+      msg.innerHTML = `<div class="error-msg">${err.message}</div>`;
+    }
+  });
+</script>
+</body>
+</html>

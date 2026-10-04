@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Westford Sports - Indian Academy</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<div class="app-header no-print">
+  <div>
+    <h1>Westford Sports - Indian Academy</h1>
+    <div class="who" id="whoAmI"></div>
+  </div>
+  <div class="actions">
+    <a href="/change-password.html" class="btn-secondary" style="text-decoration:none;display:inline-block">Change Password</a>
+    <button class="btn-secondary" id="logoutBtn">Log Out</button>
+  </div>
+</div>
+
+<div class="tabs no-print" id="tabBar">
+  <button class="tab-btn active admin-only" data-tab="register">Registration</button>
+  <button class="tab-btn" data-tab="attendance">Attendance &amp; Renewals</button>
+  <button class="tab-btn" data-tab="reports">Reports</button>
+  <button class="tab-btn admin-only" data-tab="schedule">Schedule Config</button>
+  <button class="tab-btn admin-only" data-tab="fees">Fee Management</button>
+  <button class="tab-btn admin-only" data-tab="trainers">Trainers &amp; Access</button>
+  <button class="tab-btn admin-only" data-tab="upload">Bulk Upload</button>
+</div>
+
+<div class="content">
+
+  <!-- REGISTRATION -->
+  <div class="panel active" id="panel-register">
+    <h2 class="section-title">Student Registration &amp; Payment Details</h2>
+    <form id="regForm">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="fullName">Student Full Name *</label>
+          <input type="text" id="fullName" required placeholder="e.g. John Doe">
+        </div>
+        <div class="form-group">
+          <label for="gender">Gender *</label>
+          <select id="gender" required>
+            <option value="" disabled selected>Select gender...</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Prefer not to say">Prefer not to say</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="photoInput">Profile Picture (optional)</label>
+          <input type="file" id="photoInput" accept="image/*">
+          <div id="photoPreviewWrap" class="hidden" style="margin-top:8px">
+            <img id="photoPreview" alt="Preview" style="width:80px;height:80px;object-fit:cover;border-radius:50%;border:1px solid #cbd5e1">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="dob">Date of Birth *</label>
+          <input type="date" id="dob" required>
+        </div>
+        <div class="form-group">
+          <label for="age">Age (auto-calculated)</label>
+          <input type="number" id="age" readonly placeholder="Fills in automatically">
+        </div>
+        <div class="form-group">
+          <label for="registrationType">Registration Type *</label>
+          <select id="registrationType" required>
+            <option value="New Registration">New Registration</option>
+            <option value="Trial">Trial</option>
+            <option value="Renewal">Renewal</option>
+          </select>
+        </div>
+        <div class="form-group" id="referredByGroup">
+          <label for="referredBy">Referred By *</label>
+          <input type="text" id="referredBy" placeholder="e.g. Existing student, staff, Google, walk-in">
+        </div>
+        <div class="form-group">
+          <label for="sport">Select Training Activity *</label>
+          <select id="sport" required>
+            <option value="" disabled selected>Choose a sport...</option>
+            <option value="badminton">Badminton</option>
+            <option value="football">Football</option>
+            <option value="cricket">Cricket</option>
+            <option value="swimming">Swimming</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="trainer">Trainer *</label>
+          <select id="trainer" required>
+            <option value="" disabled selected>Select trainer...</option>
+          </select>
+        </div>
+        <div class="form-group full-width" id="scheduleGroup">
+          <label>Training Schedule * <span class="small-note">Select one or more days and a time slot for each.</span></label>
+          <div id="dayCheckboxes" class="day-checkboxes"></div>
+          <div id="scheduleRows" class="schedule-rows"></div>
+        </div>
+        <div class="form-group">
+          <label for="sessionCount">Session Package *</label>
+          <select id="sessionCount" required>
+            <option value="" disabled selected>Select session package...</option>
+            <option value="8">8 Sessions</option>
+            <option value="12">12 Sessions</option>
+            <option value="16">16 Sessions</option>
+            <option value="24">24 Sessions</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="additionalSessions">Additional Sessions (Free)</label>
+          <input type="number" id="additionalSessions" min="0" max="20" value="0">
+        </div>
+        <div class="form-group">
+          <label for="discountCard">Discount Card Waiver Choice</label>
+          <select id="discountCard">
+            <option value="none">None (Standard Fee)</option>
+            <option value="fazza">Fazza Card (Waiver Registration Fee)</option>
+            <option value="enbd">ENBD Platinum Card (Waiver Registration Fee)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="cardNumber">Card / Membership ID (If Applicable)</label>
+          <input type="text" id="cardNumber">
+        </div>
+        <div class="form-group">
+          <label for="rrn">Payment RRN / Ref Number *</label>
+          <input type="text" id="rrn" required>
+        </div>
+        <div class="form-group">
+          <label for="phone">Contact Number *</label>
+          <input type="tel" id="phone" required placeholder="+971 50 000 0000">
+        </div>
+        <div class="form-group full-width">
+          <div class="fee-breakdown" id="feeBreakdown">
+            <p><span>Session Package Fee:</span> <span id="lblSessionFee">0.00 AED</span></p>
+            <p><span>One-Time Registration Fee (No VAT):</span> <span id="lblRegFee">0.00 AED</span></p>
+            <p><span>Waiver Discount:</span> <span id="lblWaiver">-0.00 AED</span></p>
+            <p><span>Subtotal:</span> <span id="lblSubtotal">0.00 AED</span></p>
+            <p><span>VAT (5% — Session Fee only):</span> <span id="lblVatFee">0.00 AED</span></p>
+            <p class="total-row"><span>Grand Total:</span> <span id="lblTotalFee">0.00 AED</span></p>
+          </div>
+        </div>
+        <div class="form-group full-width">
+          <label for="notes">Additional Remarks / Medical Conditions</label>
+          <textarea id="notes" rows="3"></textarea>
+        </div>
+        <div class="form-group full-width">
+          <button type="submit" class="btn btn-block">Submit Registration &amp; Payment</button>
+        </div>
+      </div>
+    </form>
+    <div id="regMsg"></div>
+  </div>
+
+  <!-- ATTENDANCE & RENEWALS -->
+  <div class="panel" id="panel-attendance">
+    <h2 class="section-title">Student Attendance &amp; Renewals</h2>
+    <div class="filter-row no-print">
+      <select id="attendanceSportFilter">
+        <option value="all">All Activities</option>
+        <option value="badminton">Badminton</option>
+        <option value="football">Football</option>
+        <option value="cricket">Cricket</option>
+        <option value="swimming">Swimming</option>
+      </select>
+      <input id="studentSearch" placeholder="Search student / ID">
+      <button class="btn-secondary" onclick="window.print()">Print</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Student</th><th>Activity / Trainer</th><th>Type</th><th>Sessions</th><th>Attendance</th><th>Actions</th></tr></thead>
+        <tbody id="studentTableBody"><tr><td colspan="7" style="text-align:center;color:#64748b;padding:25px">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- REPORTS -->
+  <div class="panel" id="panel-reports">
+    <h2 class="section-title">Reports</h2>
+    <div class="filter-row no-print">
+      <select id="reportType">
+        <option value="all">All Reports (combined)</option>
+        <option value="attendance">Attendance Report</option>
+        <option value="trial">Trial Report</option>
+        <option value="registration">Registration Report</option>
+        <option value="renewal">Renewal Report</option>
+        <option value="daily">Daily Rollup Report</option>
+      </select>
+      <select id="reportActivity">
+        <option value="all">All Activities</option>
+        <option value="badminton">Badminton</option>
+        <option value="football">Football</option>
+        <option value="cricket">Cricket</option>
+        <option value="swimming">Swimming</option>
+      </select>
+      <select id="reportPeriod">
+        <option value="today">Today</option>
+        <option value="week">This Week (last 7 days)</option>
+        <option value="custom">Custom Period</option>
+      </select>
+      <input type="date" id="reportFrom" class="hidden">
+      <input type="date" id="reportTo" class="hidden">
+      <input type="date" id="reportDailyDate" class="hidden">
+      <button class="btn" id="runReportBtn">Generate</button>
+      <button class="btn-secondary" onclick="window.print()">Print</button>
+      <button class="btn-secondary" id="exportExcelBtn">Export to Excel</button>
+    </div>
+    <div id="reportOutput"></div>
+  </div>
+
+  <!-- SCHEDULE CONFIG (admin) -->
+  <div class="panel" id="panel-schedule">
+    <h2 class="section-title">Training Schedule Slot Configuration</h2>
+    <div class="filter-row no-print">
+      <select id="scheduleConfigActivity">
+        <option value="badminton">Badminton</option>
+        <option value="football">Football</option>
+        <option value="cricket">Cricket</option>
+        <option value="swimming">Swimming</option>
+      </select>
+      <button class="btn-secondary" id="loadScheduleConfigBtn">Load</button>
+    </div>
+    <div id="scheduleConfigOutput"></div>
+    <button class="btn" id="saveScheduleConfigBtn" style="margin-top:16px">Save Slot Configuration</button>
+    <div id="scheduleConfigMsg"></div>
+    <p class="small-note" style="margin-top:10px">Add a day/time using the format "4:00 PM – 5:00 PM". Add "— Ladies Only" (or any label) plus a restricted trainer if a slot should only be bookable with a specific trainer.</p>
+  </div>
+
+  <!-- FEE MANAGEMENT (admin) -->
+  <div class="panel" id="panel-fees">
+    <h2 class="section-title">Fee Management Control</h2>
+    <div class="mini-card" style="max-width:340px;margin-bottom:16px">
+      <h4>Registration Fee Settings</h4>
+      <div class="fee-input-group"><label>One-Time Registration Fee (AED):</label><input type="number" id="editRegFee"></div>
+    </div>
+    <div class="card-grid" id="feeMatrixGrid"></div>
+    <button class="btn" id="saveFeesBtn" style="margin-top:16px">Update Pricing Rules</button>
+    <div id="feeMsg"></div>
+  </div>
+
+  <!-- TRAINERS & ACCESS (admin) -->
+  <div class="panel" id="panel-trainers">
+    <h2 class="section-title">Trainers &amp; Login Accounts</h2>
+    <div class="form-grid" style="margin-bottom:20px">
+      <div class="form-group">
+        <label for="newTrainerName">Trainer Name</label>
+        <input type="text" id="newTrainerName" placeholder="e.g. Priya">
+      </div>
+      <div class="form-group">
+        <label for="newTrainerActivity">Activity</label>
+        <select id="newTrainerActivity">
+          <option value="badminton">Badminton</option>
+          <option value="football">Football</option>
+          <option value="cricket">Cricket</option>
+          <option value="swimming">Swimming</option>
+        </select>
+      </div>
+      <div class="form-group full-width">
+        <button class="btn" id="addTrainerBtn">Add Trainer (creates login with default password)</button>
+      </div>
+    </div>
+    <div id="trainerMsg"></div>
+    <table class="data-table">
+      <thead><tr><th>Name</th><th>Activity</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody id="trainerTableBody"></tbody>
+    </table>
+    <h3 class="section-title" style="margin-top:30px">Reset a User's Password</h3>
+    <p class="small-note">Resets the chosen account back to the default password and forces a change on next login. Passwords are stored securely (hashed) and cannot be revealed in plain text — reset is the safe equivalent of "view password."</p>
+    <div class="filter-row">
+      <input type="text" id="resetUsername" placeholder="Username to reset">
+      <button class="btn-secondary" id="resetPasswordBtn">Reset Password</button>
+    </div>
+    <div id="resetMsg"></div>
+  </div>
+
+  <!-- BULK UPLOAD (admin) -->
+  <div class="panel" id="panel-upload">
+    <h2 class="section-title">Bulk Student Data Upload</h2>
+    <p class="small-note">Download the template, fill it in, then upload it here. Each row is validated individually — valid rows are added even if others in the same file have errors.</p>
+    <div class="filter-row">
+      <a href="#" class="btn-secondary" id="downloadTemplateLink" style="text-decoration:none;display:inline-block">Download Template</a>
+      <input type="file" id="uploadFile" accept=".xlsx,.xls">
+      <button class="btn" id="uploadBtn">Upload</button>
+    </div>
+    <div id="uploadMsg"></div>
+    <div id="uploadErrors"></div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="/api.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

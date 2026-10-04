@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Check Attendance Status | Westford Sports - Indian Academy</title>
+<link rel="stylesheet" href="/styles.css">
+<style>
+  .status-card { display: flex; gap: 14px; align-items: flex-start; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-top: 14px; }
+  .status-photo { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 1px solid #cbd5e1; flex-shrink: 0; }
+  .status-photo-placeholder { width: 72px; height: 72px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 26px; flex-shrink: 0; }
+  .status-dates { max-height: 160px; overflow-y: auto; margin-top: 8px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="center-screen">
+  <div class="card" style="max-width: 520px">
+    <h1>Check Attendance Status</h1>
+    <p class="sub">Search by your registered mobile number, student ID, or name. No login needed.</p>
+    <form id="statusForm">
+      <label for="query">Mobile Number / Student ID / Name</label>
+      <input type="text" id="query" required placeholder="e.g. +971 50 000 0000, BN001, or your name">
+      <button type="submit" class="btn btn-block">Search</button>
+    </form>
+    <div id="msg"></div>
+    <div id="results"></div>
+    <p class="small-note" style="margin-top:16px"><a href="/login.html">Staff login</a></p>
+  </div>
+</div>
+<script>
+function escapeHtml(x) { return String(x ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c])); }
+function capitalize(x) { return x ? x.charAt(0).toUpperCase() + x.slice(1) : ''; }
+
+document.getElementById('statusForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('msg');
+  const results = document.getElementById('results');
+  msg.innerHTML = '';
+  results.innerHTML = '';
+  const q = document.getElementById('query').value.trim();
+
+  try {
+    const res = await fetch(`/api/public/status?q=${encodeURIComponent(q)}`);
+    const data = await res.json();
+    if (!res.ok) {
+      msg.innerHTML = `<div class="error-msg">${escapeHtml(data.error || 'Something went wrong.')}</div>`;
+      return;
+    }
+    if (!data.length) {
+      msg.innerHTML = '<div class="error-msg">No matching student found. Double-check the spelling, ID, or number, or contact the academy.</div>';
+      return;
+    }
+    results.innerHTML = data.map(s => {
+      const photo = s.photo
+        ? `<img src="${s.photo}" alt="" class="status-photo">`
+        : `<div class="status-photo-placeholder">${escapeHtml((s.name || '?').trim().charAt(0).toUpperCase())}</div>`;
+      const dates = s.presentDates.length
+        ? s.presentDates.map(d => `${escapeHtml(d.date || 'no date')}${d.slot ? ' (' + escapeHtml(d.slot) + ')' : ''}`).join('<br>')
+        : 'No sessions marked present yet.';
+      return `<div class="status-card">
+        ${photo}
+        <div>
+          <strong>${escapeHtml(s.name)}</strong> — ${escapeHtml(s.studentCode)}<br>
+          <span class="small-note">${capitalize(s.activity)} · ${s.sessionsPresent} / ${s.totalSessions} sessions attended</span>
+          <div class="status-dates">${dates}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch (err) {
+    msg.innerHTML = '<div class="error-msg">Could not reach the server. Please try again.</div>';
+  }
+});
+</script>
+</body>
+</html>
